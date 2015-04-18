@@ -128,7 +128,7 @@ public class LoginActivity extends Activity {
                         //User successfully logged in, create login session
                         session.setLogin(true);
                         //and store user
-                        db.addUser(json);
+                        db.addLogin(json);
                         db.addEvent("", "Ferie", "DKK", "#555555");
 
                         //Launch main activity

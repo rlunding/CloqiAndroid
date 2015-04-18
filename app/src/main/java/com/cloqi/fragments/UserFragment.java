@@ -58,7 +58,7 @@ public class UserFragment extends Fragment{
         }
 
         //Fetching user details from sqlite
-        HashMap<String, String> user = db.getUserDetails();
+        HashMap<String, String> user = db.getLoginDetails();
         String id = user.get(SQLiteHandler.KEY_LOGIN_DB_ID);
         String name = user.get(SQLiteHandler.KEY_LOGIN_NAME);
         String email = user.get(SQLiteHandler.KEY_LOGIN_EMAIL);
@@ -88,7 +88,7 @@ public class UserFragment extends Fragment{
     private void logoutUser(){
         Log.d(TAG, "Logout user");
         session.setLogin(false);
-        db.deleteUsers();
+        db.deleteLoginDetails();
 
         //Launching the login activity
         Intent intent = new Intent(getActivity(), LoginActivity.class);

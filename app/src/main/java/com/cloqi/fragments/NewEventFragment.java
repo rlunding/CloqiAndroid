@@ -103,7 +103,7 @@ public class NewEventFragment extends Fragment {
         Matcher matcher = pattern.matcher(color);
 
         if (!name.isEmpty() && !currency.isEmpty() && matcher.matches()){
-            db.addEvent("", name, currency, color);
+            db.addEvent(String.valueOf(Math.random()*10000), name, currency, color);
             Toast.makeText(getActivity(), "Event created", Toast.LENGTH_LONG).show();
             MainActivity ma = (MainActivity) getActivity();
             ma.displayView(1);
