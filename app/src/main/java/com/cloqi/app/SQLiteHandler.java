@@ -31,7 +31,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     //Constants
     public static final String TAG = SQLiteHandler.class.getSimpleName();
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 17;
     private static final String DATABASE_NAME = "cloqi";
     private static final String TABLE_LOGIN = "login";
     private static final String TABLE_EVENT = "events";
@@ -66,7 +66,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String KEY_EXPENSE_AMOUNT = "expense_amount";
     public static final String KEY_EXPENSE_CURRENCY = "expense_currency";
 
-    public static final String KEY_EXPENSE_USER = "id";
+    public static final String KEY_EXPENSE_USER_ID = "id";
 
     //Fields
 
@@ -110,8 +110,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_USERS_TABLE);
         String CREATE_EVENT_USER_TABLE = "CREATE TABLE " + TABLE_EVENT_USER + "("
                 + KEY_EVENT_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_EVENT_DB_ID + " TEXT UNIQUE,"
-                + KEY_USER_DB_ID + " TEXT UNIQUE"
+                + KEY_EVENT_DB_ID + " TEXT,"
+                + KEY_USER_DB_ID + " TEXT"
                 + ");";
         db.execSQL(CREATE_EVENT_USER_TABLE);
         String CREATE_EXPENSE_TABLE = "CREATE TABLE " + TABLE_EXPENSE + "("
@@ -119,15 +119,15 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_EXPENSE_DB_ID + " TEXT UNIQUE,"
                 + KEY_EXPENSE_TITLE + " TEXT,"
                 + KEY_EXPENSE_PAYER_EMAIL + " TEXT,"
-                + KEY_EXPENSE_AMOUNT + " INTEGER,"
+                + KEY_EXPENSE_AMOUNT + " REAL,"
                 + KEY_EXPENSE_CURRENCY + " TEXT,"
                 + KEY_EVENT_DB_ID + " TEXT"
                 + ");";
         db.execSQL(CREATE_EXPENSE_TABLE);
         String CREATE_EXPENSE_USER_TABLE = "CREATE TABLE " + TABLE_EXPENSE_USER + "("
-                + KEY_EVENT_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_EXPENSE_DB_ID + " STRING UNIQUE,"
-                + KEY_USER_DB_ID + " STRING UNIQUE"
+                + KEY_EXPENSE_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_EXPENSE_DB_ID + " TEXT,"
+                + KEY_USER_DB_ID + " TEXT"
                 + ");";
         db.execSQL(CREATE_EXPENSE_USER_TABLE);
         Log.d(TAG, "Database tables created");
@@ -222,6 +222,11 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         return user;
     }
 
+    public String getLoginEmail(){
+        HashMap<String, String> details = getLoginDetails();
+        return details.get(KEY_LOGIN_EMAIL);
+    }
+
     /**
      * Delete all users
      */
@@ -273,7 +278,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         return events;
     }
 
-    public YouPayEvent getEvent(String id) {
+    public YouPayEvent getEvent(String id, boolean loadAllDetails) {
         YouPayEvent event = null;
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_EVENT + " WHERE " + KEY_EVENT_DB_ID + "=?";
@@ -284,12 +289,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(KEY_EVENT_NAME)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EVENT_CURRENCY))),
                     cursor.getString(cursor.getColumnIndex(KEY_EVENT_COLOR)));
-            /*for (Expense e : getExpenses(id)){
-                event.addExpense(e);
+            if (loadAllDetails){
+                for (Expense e : getExpenses(id)){
+                    event.addExpense(e);
+                }
+                for (Person p: getUsersForEvent(id)){
+                    event.addPerson(p);
+                }
             }
-            for (Person p: getUsersForEvent(id)){
-                event.addPerson(p);
-            }*/
         }
         cursor.close();
         return event;
@@ -344,6 +351,27 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         long db_id = db.update(TABLE_EVENT, values, whereClause, null);//Updateing row
         db.close(); //Closing database connection
         Log.d(TAG, "Event color updated in sqlite: " + db_id);
+    }
+
+    public void addUserToEvent(String user_id, String event_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_USER_DB_ID, user_id);
+        values.put(KEY_EVENT_DB_ID, event_id);
+
+        long db_id = db.insert(TABLE_EVENT_USER, null, values); //inserting row
+        db.close(); //Closing database connection
+        Log.d(TAG, "User added to event in sqlite: " + db_id);
+    }
+
+    public void removeUserFromEvent(String user_id, String event_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String whereClause = KEY_USER_DB_ID + "=? AND " + KEY_EVENT_DB_ID + "=?";
+        String[] args = new String[]{user_id, event_id};
+        long db_id = db.delete(TABLE_EVENT_USER,  whereClause, args); //inserting row
+        db.close(); //Closing database connection
+        Log.d(TAG, "User removed from event in sqlite: " + db_id);
     }
 
 
@@ -430,8 +458,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             persons.add(new PersonImpl(
-                    cursor.getString(2),
-                    cursor.getString(3)
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)),
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_REAL_NAME)),
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_EMAIL))
 
             ));
             cursor.moveToNext();
@@ -440,17 +469,56 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         return persons;
     }
 
+    public void printUserEvent(){
+        for (Person p : getUsers()){
+            Log.d(TAG, "Users: " + p.getEmail() + ", " + p.getDBid());
+        }
+
+        String select = "SELECT * FROM " + TABLE_EVENT_USER;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(select, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)) + ", " + cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+    }
+
+    public void printUserExpenses(){
+        for (Person p : getUsers()){
+            Log.d(TAG, "Users: " + p.getEmail() + ", " + p.getDBid());
+        }
+        String select = "SELECT * FROM " + TABLE_EXPENSE_USER;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(select, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            Log.d(TAG, cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)) + ", " + cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_DB_ID)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+    }
+
     public ArrayList<Person> getUsersForEvent(String id){
+
+        printUserEvent();
         ArrayList<Person> persons = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_USERS + "tu, " + TABLE_EVENT_USER + " teu"
-                + " WHERE tu." + KEY_USER_DB_ID + " = teu." + KEY_USER_DB_ID
-                + " AND teu." + KEY_EVENT_DB_ID + " = '" + id + "';";
+        /*String selectQuery = "SELECT * FROM " + TABLE_USERS + " " + TABLE_EVENT_USER
+                + " WHERE " + TABLE_USERS + "." + KEY_USER_DB_ID + " = " + TABLE_EVENT_USER + "." + KEY_USER_DB_ID
+                + " AND " + TABLE_EVENT_USER + "." + KEY_EVENT_DB_ID + " = '" + id + "';";*/
+        String selectQuery = "SELECT " + TABLE_USERS + ".* "
+                + " FROM " + TABLE_USERS +
+                " INNER JOIN " + TABLE_EVENT_USER
+                + " ON " + TABLE_USERS + "." + KEY_USER_DB_ID + " = " + TABLE_EVENT_USER + "." + KEY_USER_DB_ID
+                + " WHERE " + TABLE_EVENT_USER + "." + KEY_EVENT_DB_ID + " = '" + id + "';";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             persons.add(new PersonImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_REAL_NAME)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_EMAIL))
             ));
@@ -461,8 +529,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<Person> getUsersForExpense(String id){
+        printUserExpenses();
         ArrayList<Person> persons = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_USERS + "tu, " + TABLE_EXPENSE_USER + " teu"
+        String selectQuery = "SELECT tu.* FROM " + TABLE_USERS + " tu, " + TABLE_EXPENSE_USER + " teu"
                 + " WHERE tu." + KEY_USER_DB_ID + " = teu." + KEY_USER_DB_ID
                 + " AND teu." + KEY_EXPENSE_DB_ID + " = '" + id + "';";
 
@@ -471,6 +540,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             persons.add(new PersonImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_REAL_NAME)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_EMAIL))
             ));
@@ -487,6 +557,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, new String[]{email});
         if (cursor.moveToFirst()) {
             person = new PersonImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_USER_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_REAL_NAME)),
                     cursor.getString(cursor.getColumnIndex(KEY_USER_EMAIL)));
         }
@@ -500,9 +571,28 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      * ****************************************
      */
 
+    /**
+     * Storing user details in database
+     */
+    public void addExpense(String id, String title, String email, double amount, String currency, String event_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EXPENSE_DB_ID, id);
+        values.put(KEY_EXPENSE_TITLE, title);
+        values.put(KEY_EXPENSE_PAYER_EMAIL, email);
+        values.put(KEY_EXPENSE_AMOUNT, amount);
+        values.put(KEY_EXPENSE_CURRENCY, currency);
+        values.put(KEY_EVENT_DB_ID, event_id);
+
+        long db_id = db.insert(TABLE_EXPENSE, null, values); //inserting row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Add expense into sqlite: " + db_id);
+    }
+
     public ArrayList<Expense> getExpenses(String id){
         ArrayList<Expense> expenses = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + KEY_EXPENSE_DB_ID + " = '" + id + "';";
+        String selectQuery = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + KEY_EVENT_DB_ID + " = '" + id + "';";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -513,7 +603,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
                     getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
-                    cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
+                    cursor.getDouble(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
                     getUsersForExpense(id)
             ));
@@ -534,7 +624,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
                     getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
-                    cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
+                    cursor.getDouble(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
                     getUsersForExpense(id)
             );
@@ -554,7 +644,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
                     getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
-                    cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
+                    cursor.getDouble(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
                     getUsersForExpense(id)
             );
@@ -584,7 +674,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Log.d(TAG, "expense title updated in sqlite: " + db_id);
     }
 
-    public void updateExpenseAmount(String id, int amount) {
+    public void updateExpenseAmount(String id, double amount) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -607,5 +697,29 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.close(); //Closing database connection
         Log.d(TAG, "Expense currency updated in sqlite: " + db_id);
     }
+
+
+    public void addUserToExpense(String user_id, String expense_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EXPENSE_DB_ID, expense_id);
+        values.put(KEY_USER_DB_ID, user_id);
+
+        long db_id = db.insert(TABLE_EXPENSE_USER, null, values); //inserting row
+        db.close(); //Closing database connection
+        Log.d(TAG, "New expense/user inserted into sqlite: " + db_id);
+    }
+
+    public void removeUserFromExpense(String user_id, String expense_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String whereClause = KEY_USER_DB_ID + "=? AND " + KEY_EXPENSE_DB_ID + "=?";
+        String[] args = new String[]{user_id, expense_id};
+        long db_id = db.delete(TABLE_EXPENSE_USER,  whereClause, args); //inserting row
+        db.close(); //Closing database connection
+        Log.d(TAG, "User/expense removed from sqlite: " + db_id);
+    }
+
+
 
 }

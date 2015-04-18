@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
                 fragment = new EventViewFragment();
                 break;
             case 2:
-                fragment = new NewEventFragment();
+                fragment = new EventNewFragment();
                 break;
             case 3:
                 fragment = new UserFragment();

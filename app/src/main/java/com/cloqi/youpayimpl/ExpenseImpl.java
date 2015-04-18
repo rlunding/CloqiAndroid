@@ -85,7 +85,7 @@ public class ExpenseImpl implements Expense{
 
     @Override
     public ArrayList<Person> getSpenders() {
-        return null;
+        return spenders;
     }
 
     @Override
@@ -102,4 +102,6 @@ public class ExpenseImpl implements Expense{
     public String toString() {
         return title + " " + person.getName() + " " + amount + " " + currency.getCode();
     }
+
+
 }

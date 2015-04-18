@@ -1,11 +1,16 @@
 package com.cloqi.gui;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
+import com.cloqi.youpayframework.Expense;
+import com.cloqi.youpayframework.Person;
+import com.cloqi.youpayframework.YouPayEvent;
 
 /**
  * Created by Lunding on 08/02/15.
@@ -39,5 +44,25 @@ public class HelperMethods {
                 setupUIRemoveKeyboardOnTouch(innerView, activity);
             }
         }
+    }
+
+    public static void printEventInLog(String tag, YouPayEvent event){
+        Log.d(tag, "Printing out information about event");
+        for (Person p : event.getPersons()){
+            Log.d(tag, "User: " + p);
+        }
+        for (Expense e : event.getExpenses()){
+            Log.d(tag, "Expense: " + e);
+        }
+        Log.d(tag, "End of event information");
+    }
+
+    public static void printExpenseInLog(String tag, Expense expense){
+        Log.d(tag, "Printing out information about expense: \n" + expense);
+        Log.d(tag, "Spenders:");
+        for (Person p : expense.getSpenders()){
+            Log.d(tag, "" + p);
+        }
+        Log.d(tag, "End of expense information");
     }
 }

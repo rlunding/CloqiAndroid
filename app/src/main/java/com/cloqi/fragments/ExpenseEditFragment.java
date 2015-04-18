@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -38,6 +39,7 @@ public class ExpenseEditFragment extends Fragment {
     private ListView personsIn;
     private ListView personsOut;
     private Expense expense;
+    private boolean personsChanged = false;
 
     private ArrayAdapter<String> currencyAdapter;
     private ArrayAdapter<Person> personsInAdapter;
@@ -75,26 +77,45 @@ public class ExpenseEditFragment extends Fragment {
 
         //Initialize event, and set gui elements with data.
         Bundle args = getArguments();
-        expense = db.getExpense(args.getString(AppConfig.EXPENSE_KEY));
+        String DBid = args.getString(AppConfig.EXPENSE_KEY);
+        Log.d(TAG, "Editing expense: " + DBid);
+        expense = db.getExpense(DBid);
+        //HelperMethods.printExpenseInLog(TAG, expense);
         setContent(expense);
 
         //Initialize person spinner
-        ArrayList<Person> users = db.getUsersForEvent(expense.getEventDBId());
-        ArrayList<Person> spenders = expense.getSpenders();
-        users.removeAll(spenders);
+        final ArrayList<Person> usersOut = db.getUsersForEvent(expense.getEventDBId());
+        final ArrayList<Person> spenders = expense.getSpenders();
+        usersOut.removeAll(spenders);
 
         personsInAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, spenders);
         personsIn.setAdapter(personsInAdapter);
 
         personsOutAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1, users);
-        personsIn.setAdapter(personsInAdapter);
+                android.R.layout.simple_list_item_1, usersOut);
+        personsOut.setAdapter(personsOutAdapter);
 
         personsIn.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, personsInAdapter.getItem(position) + " should be moved");
+                usersOut.add(personsInAdapter.getItem(position));
+                spenders.remove(personsInAdapter.getItem(position));
+                personsInAdapter.notifyDataSetChanged();
+                personsOutAdapter.notifyDataSetChanged();
+                personsChanged = true;
+            }
+        });
+
+        personsOut.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                spenders.add(personsOutAdapter.getItem(position));
+                usersOut.remove(personsOutAdapter.getItem(position));
+                personsInAdapter.notifyDataSetChanged();
+                personsOutAdapter.notifyDataSetChanged();
+                personsChanged = true;
             }
         });
 
@@ -103,16 +124,47 @@ public class ExpenseEditFragment extends Fragment {
         return rootView;
     }
 
-    /*
-     * -------------------------------------------------------------------------------------------
-     * ------------------------------------- GUI HELPER METHODS ----------------------------------
-     * -------------------------------------------------------------------------------------------
-     */
+    @Override
+    public void onPause() {
+        Log.d(TAG, "On Pause of Event edit Fragment");
+        saveEvent();
+        super.onPause();
+    }
+
+    private void saveEvent(){
+        String title = expenseTitle.getText().toString();
+        String amountString = expenseAmount.getText().toString();
+        double amount = Double.parseDouble(!amountString.isEmpty() ? amountString : "0.0");
+        String currency = expenseCurrency.getSelectedItem().toString();
+        if (!expense.getTitle().equals(title)){
+            db.updateExpenseTitle(expense.getDBid(), title);
+            //TODO: update name on server
+            Log.d(TAG, "Expense name updated");
+        }
+        if (!(Math.abs(expense.getAmount() - amount) < 0.01)){
+            db.updateExpenseAmount(expense.getDBid(), amount);
+            //TODO: update amount on server
+            Log.d(TAG, "Expense amount updated");
+        }
+        if (!expense.getCurrency().getCode().equals(currency)){
+            db.updateExpenseCurrency(expense.getDBid(), currency);
+            //TODO: update currency on server
+            Log.d(TAG, "Event currency updated");
+        }
+        if (personsChanged){
+            for (Person p : expense.getSpenders()){
+                db.removeUserFromExpense(p.getDBid(), expense.getDBid());
+            }
+            for (int i = 0; i < personsInAdapter.getCount(); i++) {
+                db.addUserToExpense(personsInAdapter.getItem(i).getDBid(), expense.getDBid());
+            }
+        }
+    }
 
     private void setContent(Expense expense){
         setExpenseTitle(expense.getTitle());
         setExpenseCurrency(expense.getCurrency().getCode());
-        setExpenseAmount((int) expense.getAmount());
+        setExpenseAmount(expense.getAmount());
     }
 
     private void setExpenseTitle(String title){
@@ -126,7 +178,7 @@ public class ExpenseEditFragment extends Fragment {
         }
     }
 
-    private void setExpenseAmount(int amount){
-        expenseAmount.setText(amount);
+    private void setExpenseAmount(double amount){
+        expenseAmount.setText(String.valueOf(amount));
     }
 }

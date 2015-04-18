@@ -10,13 +10,20 @@ import com.cloqi.youpayframework.Person;
  */
 public class PersonImpl implements Person{
 
+    private String DBid;
     private String name;
     private String mail;
 
-    public PersonImpl(String name, String mail) {
+    public PersonImpl(String DBid, String name, String mail) {
         super();
+        this.DBid = DBid;
         this.name = name;
         this.mail = mail;
+    }
+
+    @Override
+    public String getDBid() {
+        return DBid;
     }
 
     @Override
@@ -24,18 +31,18 @@ public class PersonImpl implements Person{
         return name;
     }
 
-
-    public String getMail() {
+    @Override
+    public String getEmail() {
         return mail;
     }
 
     @Override
     public String toString() {
-        return "name: " + name;
+        return name;
     }
 
     /**
-     * Two persons are equal if their name and email are equal.
+     * Two persons are equal if their email are equal.
      */
     @Override
     public boolean equals(Object obj) {
@@ -43,9 +50,9 @@ public class PersonImpl implements Person{
             return false;
         if(this == obj)
             return true;
-        if(!(obj instanceof CurrencyImpl))
+        if(!(obj instanceof PersonImpl))
             return false;
         PersonImpl p = (PersonImpl) obj;
-        return p.name.equals(this.name) && p.mail.equals(this.mail);
+        return p.mail.equals(this.mail);
     }
 }

@@ -19,7 +19,7 @@
 
 
         <EditText
-            android:id="@+id/expense_edit_title"
+            android:id="@+id/expense_new_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -33,7 +33,7 @@
 
 
         <EditText
-            android:id="@+id/expense_edit_amount"
+            android:id="@+id/expense_new_amount"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -46,7 +46,7 @@
             android:textColorHint="@color/input_new_event_hint" />
 
         <Spinner
-            android:id="@+id/expense_edit_currency"
+            android:id="@+id/expense_new_currency"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -71,14 +71,14 @@
                 android:text="Not involved:"
                 android:layout_weight="1"/>
 
-        </LinearLayout>
+            </LinearLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
             <ListView
-                android:id="@+id/expense_edit_persons_in"
+                android:id="@+id/expense_new_persons_in"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/input_new_event_bg"
@@ -87,14 +87,24 @@
             </ListView>
 
             <ListView
-                android:id="@+id/expense_edit_persons_out"
+                android:id="@+id/expense_new_persons_out"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/input_new_event_bg"
                 android:textColor="@color/white"
                 android:layout_weight="1">
             </ListView>
+
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnCreateExpense"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@color/input_new_event_bg"
+            android:text="Create expense"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

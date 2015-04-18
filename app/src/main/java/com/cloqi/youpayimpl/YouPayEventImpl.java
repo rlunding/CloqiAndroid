@@ -145,7 +145,11 @@ public class YouPayEventImpl implements YouPayEvent{
 
     @Override
     public double getTotalExpenses() {
-        return totalExpenses;
+        double counter = 0.0;
+        for (Expense e : expenses){
+            counter += getAmountInEventCurrency(e);
+        }
+        return counter;
     }
 
     /**
@@ -161,6 +165,8 @@ public class YouPayEventImpl implements YouPayEvent{
      * </ul>
      *
      */
+
+    /*
     @Override
     public ArrayList<YouPay> calculateWhoPayWho(){
         if(persons.size() == 0 || expenses.size() == 0 || currency == null){
@@ -247,7 +253,7 @@ public class YouPayEventImpl implements YouPayEvent{
         }
         whopaywhoCalculated = true;
         return payList;
-    }
+    }*/
 
     /**
      * This method calculate the amount for an expense in this events currency.<br>
@@ -264,5 +270,121 @@ public class YouPayEventImpl implements YouPayEvent{
             return amount * currency.getRate() / this.currency.getRate();
         }
     }
+
+    /**
+     * This method will calculate:
+     * <ul>
+     * 	<li>Total expenses hold by each person</li>
+     * 	<li>Total expenses</li>
+     * 	<li>Total expenses pr. person</li>
+     * 	<li>Total expenses hold by each person (with price pr. person subtracted)</li>
+     * 	<li>Who need some money</li>
+     * 	<li>Who will give some money</li>
+     * 	<li>Who is going to pay who</li>
+     * </ul>
+     *
+     */
+    @Override
+    public ArrayList<YouPay> calculateWhoPayWho(){
+        if(persons.size() == 0 || expenses.size() == 0 || currency == null){
+            return null;
+        }
+        if (whopaywhoCalculated){
+            return payList;
+        }
+
+        calculateOwed();
+
+        for (YouPay yp : payList){
+            Log.d(TAG, yp.toString());
+        }
+
+        return payList;
+    }
+
+
+    private void calculateOwed() {
+        HashMap<Person, Double> debts = new HashMap<Person, Double>();
+        for (Expense e : expenses) {
+            double amount = getAmountInEventCurrency(e);
+            int numberOfPeople = e.getSpenders().size();
+            double avg = amount / numberOfPeople;
+
+            for (Person p : e.getSpenders()) {
+                double currAmount = 0;
+                if (debts.containsKey(p)) {
+                    currAmount = debts.get(p);
+                }
+                if (p.equals(e.getPayer())) {
+                    debts.put(p, amount - avg + currAmount);
+                } else {
+                    debts.put(p, (-1 * avg) + currAmount);
+                }
+            }
+        }
+        mergeTransactions(debts);
+        whopaywhoCalculated = true;
+    }
+
+    private void mergeTransactions(HashMap<Person, Double> debts)
+    {
+        ArrayList<Person> getMoney = new ArrayList<Person>();
+        ArrayList<Person> giveMoney = new ArrayList<Person>();
+
+        for(Person p : debts.keySet()) {
+            Double amount = debts.get(p);
+            if(amount > 0){
+                getMoney.add(p);
+            } else if(amount < 0){
+                giveMoney.add(p);
+            }
+        }
+
+    	/*
+    	Log.d(TAG, "Who had expenses, and how much (in " + currency.getCode() + "):");
+        Log.d(TAG, "Total expenses: " + totalExpenses + " " + currency.getCode());
+        Log.d(TAG, "Expenses pr. person: " + pricePrPerson + " " + currency.getCode());
+        Log.d(TAG, "Who had expenses when the price pr. person is subtracted (in " + currency.getCode() +"):");
+        for(Person p : persons){
+            Log.d(TAG, p.getName() + " : " + expense.get(p));
+        }
+        Log.d(TAG, "\nThese need some money");
+        for(Person p : getMoney){
+            Log.d(TAG, p.getName());
+        }
+        Log.d(TAG, "These will give some money");
+        for(Person p : giveMoney){
+            Log.d(TAG, p.getName());
+        }
+
+        Log.d(TAG, "Who is going to pay who:");
+        */
+        while(!getMoney.isEmpty() && !giveMoney.isEmpty()){
+            Person get = getMoney.get(0);
+            Person give = giveMoney.get(0);
+            double amountGet = debts.get(get);
+            double amountGive = Math.abs(debts.get(give));
+            double pay;
+            if(amountGet - amountGive > 0){
+                pay = amountGive;
+                giveMoney.remove(give);
+                debts.remove(give);
+                debts.put(get, amountGet - amountGive);
+            } else if(amountGet - amountGive < 0){
+                pay = amountGet;
+                getMoney.remove(get);
+                debts.remove(get);
+                debts.put(give, -1 * (amountGive - amountGet));
+            } else {
+                pay = amountGive;
+                giveMoney.remove(give);
+                getMoney.remove(get);
+                debts.remove(get);
+                debts.remove(give);
+            }
+            payList.add(new WhoPayImpl(give, get, pay, getCurrency()));
+        }
+    }
+
 
 }

@@ -1,12 +1,12 @@
 package com.cloqi.fragments;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,10 +37,10 @@ import java.util.regex.Pattern;
  *
  * Created by Lunding on 18/04/15.
  */
-public class NewEventFragment extends Fragment {
+public class EventNewFragment extends Fragment {
 
     //Constants
-    public static final String TAG = NewEventFragment.class.getSimpleName();
+    public static final String TAG = EventNewFragment.class.getSimpleName();
 
     //Fields
     private EditText input_name;
@@ -48,16 +48,16 @@ public class NewEventFragment extends Fragment {
     private EditText input_color;
     private EditText input_email;
     private ListView friendListView;
-    private ArrayList<String> frindList;
+    private ArrayList<Person> frindList;
     private Button btnAddFriend;
     private Button btnNewEvent;
 
-    private ArrayAdapter<String> friendListAdapter;
+    private ArrayAdapter<Person> friendListAdapter;
 
     private SQLiteHandler db;
 
 
-    public NewEventFragment(){
+    public EventNewFragment(){
 
     }
 
@@ -88,6 +88,14 @@ public class NewEventFragment extends Fragment {
                 android.R.layout.simple_list_item_1, frindList);
         friendListView.setAdapter(friendListAdapter);
 
+        friendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                frindList.remove(friendListAdapter.getItem(position));
+                friendListAdapter.notifyDataSetChanged();
+            }
+        });
+
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,8 +124,16 @@ public class NewEventFragment extends Fragment {
         Pattern pattern = Pattern.compile(color_pattern);
         Matcher matcher = pattern.matcher(color);
 
-        if (!name.isEmpty() && !currency.isEmpty() && matcher.matches()){
-            db.addEvent(String.valueOf((int) (Math.random()*10000)), name, currency, color);
+        if (!name.isEmpty() && !currency.isEmpty() && matcher.matches() && friendListAdapter.getCount() > 0){
+            //TODO:: ADD IN DATABASE
+            String DBid = String.valueOf((int) (Math.random()*10000));
+            db.addEvent(DBid, name, currency, color);
+
+            for (int i = 0; i < friendListAdapter.getCount(); i++) {
+                Person p = friendListAdapter.getItem(i);
+                db.addUserToEvent(p.getDBid(), DBid);
+            }
+
             Toast.makeText(getActivity(), "Event created", Toast.LENGTH_LONG).show();
             MainActivity ma = (MainActivity) getActivity();
             ma.displayView(1);
@@ -150,7 +166,7 @@ public class NewEventFragment extends Fragment {
                                 db.addUser(json);
                                 JSONObject user = json.getJSONObject("user");
                                 Person person = db.getUser(user.getString("user_email"));
-                                frindList.add(person.toString());
+                                frindList.add(person);
                                 friendListAdapter.notifyDataSetChanged();
                                 input_email.setText("");
                             } else {
@@ -175,7 +191,7 @@ public class NewEventFragment extends Fragment {
                 AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
             }
         } else {
-            frindList.add(person.toString());
+            frindList.add(person);
             friendListAdapter.notifyDataSetChanged();
             input_email.setText("");
         }

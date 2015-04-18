@@ -72,23 +72,8 @@ public class EventEditFragment extends Fragment {
         //Get database
         db = new SQLiteHandler(getActivity().getApplicationContext());
 
-
-
+        //Make the total amount not editable
         totalAmount.setFocusable(false);
-        totalAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!totalAmount.getText().toString().equals(getTotalAmountString())){
-                    setTotalAmount();
-                }
-            }
-        });
-
-
 
         //Initialize currency spinner
         currencyAdapter = new ArrayAdapter<>(getActivity(),
@@ -108,7 +93,8 @@ public class EventEditFragment extends Fragment {
 
         //Initialize event, and set gui elements with data.
         Bundle args = getArguments();
-        event = db.getEvent(args.getString(AppConfig.EVENT_KEY));
+        event = db.getEvent(args.getString(AppConfig.EVENT_KEY), true);
+        HelperMethods.printEventInLog(TAG, event);
         event.calculateWhoPayWho();
         setEventName(event.getName());
         setEventColor(event.getColor());
@@ -117,16 +103,15 @@ public class EventEditFragment extends Fragment {
 
         //Initialize expenses list
         expensesAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1, db.getExpenses(event.getDBid()));
+                android.R.layout.simple_list_item_1, event.getExpenses());
         expenses.setAdapter(expensesAdapter);
         expenses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "Item: " + position + " was selected." + db.getCurrency("DDK"));
                 Expense expense = expensesAdapter.getItem(position);
                 ExpenseEditFragment fragment = ExpenseEditFragment.newInstance(expense.getDBid());
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.frame_container, fragment).addToBackStack("")
+                        .add(R.id.frame_container, fragment).addToBackStack("")
                         .commit();
             }
         });
@@ -135,7 +120,10 @@ public class EventEditFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "New expense button clicked");
-                //TODO: start new expense fragment
+                ExpenseNewFragment fragment = ExpenseNewFragment.newInstance(event.getDBid());
+                getFragmentManager().beginTransaction()
+                        .add(R.id.frame_container, fragment).addToBackStack("")
+                        .commit();
             }
         });
 
@@ -179,13 +167,14 @@ public class EventEditFragment extends Fragment {
                 db.updateEventColor(event.getDBid(), color);
                 //TODO: update color on server
                 Log.d(TAG, "Event color updated");
+
             } else {
                 Log.d(TAG, "Invalid color. Event color not updated");
             }
 
         }
+        Toast.makeText(getActivity(), "Event saved", Toast.LENGTH_LONG).show();
         Log.d(TAG, "Event updated");
-
     }
 
     /*
@@ -206,7 +195,7 @@ public class EventEditFragment extends Fragment {
     }
 
     private String getTotalAmountString(){
-        return event.getTotalExpenses()+ " " + event.getCurrency().getCode();
+        return (((int) event.getTotalExpenses()*100)/100) + " " + event.getCurrency().getCode();
     }
 
     private void setEventColor(String color){
