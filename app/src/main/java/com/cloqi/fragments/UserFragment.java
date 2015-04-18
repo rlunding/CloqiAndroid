@@ -59,10 +59,10 @@ public class UserFragment extends Fragment{
 
         //Fetching user details from sqlite
         HashMap<String, String> user = db.getUserDetails();
-        String id = user.get(SQLiteHandler.KEY_USER_DB_ID);
-        String name = user.get(SQLiteHandler.KEY_USER_NAME);
-        String email = user.get(SQLiteHandler.KEY_USER_EMAIL);
-        String token = user.get(SQLiteHandler.KEY_USER_TOKEN);
+        String id = user.get(SQLiteHandler.KEY_LOGIN_DB_ID);
+        String name = user.get(SQLiteHandler.KEY_LOGIN_NAME);
+        String email = user.get(SQLiteHandler.KEY_LOGIN_EMAIL);
+        String token = user.get(SQLiteHandler.KEY_LOGIN_TOKEN);
 
         //Display the user details on the screen
         txtName.setText(name);

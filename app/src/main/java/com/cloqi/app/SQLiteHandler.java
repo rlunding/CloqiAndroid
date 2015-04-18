@@ -30,17 +30,27 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "cloqi";
     private static final String TABLE_LOGIN = "login";
     private static final String TABLE_EVENT = "event";
+    private static final String TABLE_USERS = "users";
+    private static final String TABLE_EVENT_USER = "event_users";
 
-    private static final String KEY_USER_ID = "id";
-    public static final String KEY_USER_DB_ID = "user_id";
-    public static final String KEY_USER_NAME = "user_name";
-    public static final String KEY_USER_EMAIL = "user_email";
-    public static final String KEY_USER_TOKEN = "token";
+    private static final String KEY_LOGIN_ID = "id";
+    public static final String KEY_LOGIN_DB_ID = "login_id";
+    public static final String KEY_LOGIN_NAME = "login_name";
+    public static final String KEY_LOGIN_EMAIL = "login_email";
+    public static final String KEY_LOGIN_TOKEN = "token";
 
     public static final String KEY_EVENT_ID = "id";
+    public static final String KEY_EVENT_DB_ID = "event_id";
     public static final String KEY_EVENT_NAME = "event_name";
-    public static final String KEY_EVENT_CURRENCY = "currency";
-    public static final String KEY_EVENT_COLOR = "color";
+    public static final String KEY_EVENT_CURRENCY = "event_currency";
+    public static final String KEY_EVENT_COLOR = "event_color";
+
+    public static final String KEY_USER_ID = "id";
+    public static final String KEY_USER_DB_ID = "user_id";
+    public static final String KEY_USER_REAL_NAME = "user_name";
+    public static final String KEY_USER_EMAIL = "user_email";
+
+    public static final String KEY_EVENT_USER_ID = "id";
 
     //Fields
 
@@ -61,19 +71,33 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_LOGIN + "("
-                + KEY_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_USER_NAME + " TEXT,"
-                + KEY_USER_EMAIL + " TEXT UNIQUE,"
-                + KEY_USER_TOKEN + " TEXT,"
-                + KEY_USER_DB_ID + " TEXT" + ");";
+                + KEY_LOGIN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_LOGIN_NAME + " TEXT,"
+                + KEY_LOGIN_EMAIL + " TEXT UNIQUE,"
+                + KEY_LOGIN_TOKEN + " TEXT,"
+                + KEY_LOGIN_DB_ID + " TEXT" + ");";
         db.execSQL(CREATE_LOGIN_TABLE);
         String CREATE_EVENT_TABLE = "CREATE TABLE " + TABLE_EVENT + "("
                 + KEY_EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_EVENT_DB_ID + " TEXT UNIQUE,"
                 + KEY_EVENT_NAME + " TEXT,"
                 + KEY_EVENT_CURRENCY + " TEXT,"
                 + KEY_EVENT_COLOR + " TEXT"
                 + ");";
         db.execSQL(CREATE_EVENT_TABLE);
+        String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + "("
+                + KEY_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_USER_DB_ID + " TEXT,"
+                + KEY_USER_REAL_NAME + " TEXT,"
+                + KEY_USER_EMAIL + " TEXT,"
+                + ");";
+        db.execSQL(CREATE_USERS_TABLE);
+        String CREATE_EVENT_USER_TABLE = "CREATE TABLE " + TABLE_EVENT_USER + "("
+                + KEY_EVENT_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_EVENT_DB_ID + " INTEGER,"
+                + KEY_USER_DB_ID + " INTEGER"
+                + ");";
+        db.execSQL(CREATE_EVENT_USER_TABLE);
         Log.d(TAG, "Database tables created");
     }
 
@@ -83,6 +107,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         //Drop older tables if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGIN);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENT);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENT_USER);
         //Create tables again
         onCreate(db);
     }
@@ -94,10 +120,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_USER_DB_ID, id);
-        values.put(KEY_USER_NAME, name);
-        values.put(KEY_USER_EMAIL, email);
-        values.put(KEY_USER_TOKEN, token);
+        values.put(KEY_LOGIN_DB_ID, id);
+        values.put(KEY_LOGIN_NAME, name);
+        values.put(KEY_LOGIN_EMAIL, email);
+        values.put(KEY_LOGIN_TOKEN, token);
 
         long db_id = db.insert(TABLE_LOGIN, null, values); //inserting row
         db.close(); //Closing database connection
@@ -126,8 +152,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_USER_TOKEN, token);
-        String whereClause = KEY_USER_DB_ID + "=" + id;
+        values.put(KEY_LOGIN_TOKEN, token);
+        String whereClause = KEY_LOGIN_DB_ID + "=" + id;
 
         long db_id = db.update(TABLE_LOGIN, values, whereClause, null);//Updateing row
         db.close(); //Closing database connection
@@ -145,10 +171,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
         cursor.moveToFirst(); //get first user
         if (cursor.getCount() > 0) {
-            user.put(KEY_USER_NAME, cursor.getString(1));
-            user.put(KEY_USER_EMAIL, cursor.getString(2));
-            user.put(KEY_USER_TOKEN, cursor.getString(3));
-            user.put(KEY_USER_DB_ID, cursor.getString(4));
+            user.put(KEY_LOGIN_NAME, cursor.getString(1));
+            user.put(KEY_LOGIN_EMAIL, cursor.getString(2));
+            user.put(KEY_LOGIN_TOKEN, cursor.getString(3));
+            user.put(KEY_LOGIN_DB_ID, cursor.getString(4));
         }
         cursor.close();
         db.close();
@@ -184,10 +210,11 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      */
 
 
-    public void addEvent(String name, String currency, String color) {
+    public void addEvent(String id, String name, String currency, String color) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_EVENT_DB_ID, id);
         values.put(KEY_EVENT_NAME, name);
         values.put(KEY_EVENT_CURRENCY, currency);
         values.put(KEY_EVENT_COLOR, color);
@@ -208,8 +235,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         while (!cursor.isAfterLast()) {
             events.add(new YouPayEventImpl(
                     cursor.getString(1),
-                    getCurrency(cursor.getString(2)),
-                    cursor.getString(3)));
+                    cursor.getString(2),
+                    getCurrency(cursor.getString(3)),
+                    cursor.getString(4)));
             cursor.moveToNext();
         }
         cursor.close();
@@ -224,8 +252,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             event = new YouPayEventImpl(
                     cursor.getString(1),
-                    getCurrency(cursor.getString(2)),
-                    cursor.getString(3));
+                    cursor.getString(2),
+                    getCurrency(cursor.getString(3)),
+                    cursor.getString(4));
         }
         cursor.close();
         return event;

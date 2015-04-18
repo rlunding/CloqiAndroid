@@ -8,6 +8,8 @@ import java.util.ArrayList;
  */
 public interface YouPayEvent {
 
+    public String getDBid();
+    public void setDBid(String DBid);
     public String getName();
     public Currency getCurrency();
     public double getTotalExpenses();

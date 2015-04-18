@@ -30,6 +30,7 @@ public class YouPayEventImpl implements YouPayEvent{
     private static final String TAG = YouPayEventImpl.class.getSimpleName();
 
     //Fields
+    private String DBid;
     private String name;
     private Currency currency;
     private ArrayList<Person> persons;
@@ -47,8 +48,9 @@ public class YouPayEventImpl implements YouPayEvent{
      * @param name of the event
      * @param currency of the event
      */
-    public YouPayEventImpl(String name, Currency currency, String color) {
+    public YouPayEventImpl(String DBid, String name, Currency currency, String color) {
         super();
+        this.DBid = DBid;
         this.name = name;
         this.currency = currency;
         this.persons = new ArrayList<>();
@@ -58,6 +60,16 @@ public class YouPayEventImpl implements YouPayEvent{
         this.pricePrPerson = 0;
         this.color = color;
         this.whopaywhoCalculated = false;
+    }
+
+    @Override
+    public String getDBid() {
+        return DBid;
+    }
+
+    @Override
+    public void setDBid(String DBid){
+        this.DBid = DBid;
     }
 
     @Override

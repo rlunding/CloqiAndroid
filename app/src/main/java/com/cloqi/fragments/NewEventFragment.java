@@ -1,7 +1,6 @@
 package com.cloqi.fragments;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +8,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.cloqi.R;
 import com.cloqi.activities.MainActivity;
 import com.cloqi.app.SQLiteHandler;
-import com.cloqi.youpayframework.Currency;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,8 +33,16 @@ public class NewEventFragment extends Fragment {
     private EditText input_name;
     private Spinner input_currency;
     private EditText input_color;
+    private EditText input_email;
+    private ListView friendListView;
+    private ArrayList<String> frindList;
+    private Button btnAddFriend;
     private Button btnNewEvent;
+
+    private ArrayAdapter<String> friendListAdapter;
+
     private SQLiteHandler db;
+
 
     public NewEventFragment(){
 
@@ -49,7 +57,10 @@ public class NewEventFragment extends Fragment {
         input_name = (EditText) rootView.getRootView().findViewById(R.id.new_event_name);
         input_currency = (Spinner) rootView.getRootView().findViewById(R.id.new_event_currency);
         input_color = (EditText) rootView.getRootView().findViewById(R.id.new_event_color);
+        input_email = (EditText) rootView.getRootView().findViewById(R.id.new_event_friend_email);
+        btnAddFriend = (Button) rootView.getRootView().findViewById(R.id.btnAddFriend);
         btnNewEvent = (Button) rootView.getRootView().findViewById(R.id.btnNewEvent);
+        friendListView = (ListView) rootView.getRootView().findViewById(R.id.new_event_friends);
 
         db = new SQLiteHandler(getActivity().getApplicationContext());
 
@@ -58,12 +69,25 @@ public class NewEventFragment extends Fragment {
                 android.R.layout.simple_spinner_item, db.getCurrencyNames());
         input_currency.setAdapter(adapter);
 
+        frindList = new ArrayList<>();
+        friendListAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, frindList);
+        friendListView.setAdapter(friendListAdapter);
+
+        btnAddFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addFriend();
+            }
+        });
+
         btnNewEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createEvent();
             }
         });
+
 
         return rootView;
     }
@@ -79,12 +103,22 @@ public class NewEventFragment extends Fragment {
         Matcher matcher = pattern.matcher(color);
 
         if (!name.isEmpty() && !currency.isEmpty() && matcher.matches()){
-            db.addEvent(name, currency, color);
+            db.addEvent("", name, currency, color);
             Toast.makeText(getActivity(), "Event created", Toast.LENGTH_LONG).show();
             MainActivity ma = (MainActivity) getActivity();
             ma.displayView(1);
         } else {
             Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void addFriend(){
+        String email = input_email.getText().toString();
+
+        if (!email.isEmpty()){
+            frindList.add(email);
+            friendListAdapter.notifyDataSetChanged();
+            input_email.setText("");
         }
     }
 }
