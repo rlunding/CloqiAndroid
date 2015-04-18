@@ -15,6 +15,10 @@
 
     <string name="MESSAGE_REGISTER_SUCCESS">Registration successful</string>
 
+    <string name="HINT_EVENT_NAME">Event name</string>
+    <string name="HINT_EVENT_COLOR">#color</string>
+    <string name="btn_new_event">Create event</string>
+
     <string name="drawer_open">Slider Menu Opened</string>
     <string name="drawer_close">Slider Menu Closed</string>
 

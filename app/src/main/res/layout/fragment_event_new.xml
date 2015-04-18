@@ -1,23 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bg_gradient"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="10dp">
 
-    <TextView
-        android:id="@+id/txtLabel"
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:textSize="16dp"
-        android:text="New event View"/>
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp" >
 
-    <ImageView android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/txtLabel"
-        android:src="@mipmap/ic_action_help"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"/>
+        <TextView
+            android:id="@+id/txtLabel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"
+            android:textSize="25dp"
+            android:text="Create new event"/>
 
+        <EditText
+            android:id="@+id/new_event_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:hint="@string/HINT_EVENT_NAME"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="textCapWords"
+            android:textColor="@color/input_new_event"
+            android:textColorHint="@color/input_new_event_hint" />
 
-</RelativeLayout>
+        <Spinner
+            android:id="@+id/new_event_currency"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:textColor="@color/input_new_event"/>
+
+        <EditText
+            android:id="@+id/new_event_color"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:hint="@string/HINT_EVENT_COLOR"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="textCapWords"
+            android:textColor="@color/input_new_event"
+            android:textColorHint="@color/input_new_event_hint" />
+
+        <Button
+            android:id="@+id/btnNewEvent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dip"
+            android:background="@color/input_new_event_bg"
+            android:text="@string/btn_new_event"
+            android:textColor="@color/white" />
+
+        </LinearLayout>
+
+</LinearLayout>

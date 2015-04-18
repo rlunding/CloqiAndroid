@@ -82,7 +82,6 @@ public class MainActivity extends Activity {
         if (savedInstanceState == null){
             displayView(0);
         }
-
     }
 
     /**
@@ -130,7 +129,7 @@ public class MainActivity extends Activity {
     /**
      * Displaying fragment view for selected nav drawer list item
      */
-    private void displayView(int position){
+    public void displayView(int position){
         //update the main content by replacing fragments
         Fragment fragment = null;
         switch (position){
@@ -150,7 +149,7 @@ public class MainActivity extends Activity {
                 fragment = new PreferencesFragment();
                 break;
             case 5:
-                fragment = new HomeFragment();
+                fragment = new AboutFragment();
                 break;
             default:
                 break;

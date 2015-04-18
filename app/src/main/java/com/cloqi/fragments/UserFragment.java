@@ -39,7 +39,7 @@ public class UserFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "Register Fragment initializing...");
+        Log.d(TAG, "User Fragment initializing...");
         View rootView = inflater.inflate(R.layout.fragment_user, container, false);
 
         //Input components
@@ -76,6 +76,8 @@ public class UserFragment extends Fragment{
             }
         });
 
+
+        Log.d(TAG, "User fragment initialized");
         return rootView;
     }
 

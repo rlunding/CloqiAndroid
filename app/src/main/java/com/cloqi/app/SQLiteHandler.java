@@ -257,4 +257,13 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         return null;
     }
 
+    public String[] getCurrencyNames(){
+        ArrayList<Currency> currencies = getCurrencies();
+        String[] output = new String[currencies.size()];
+        for (int i = 0; i < currencies.size(); i++) {
+            output[i] = currencies.get(i).getCode();
+        }
+        return output;
+    }
+
 }
