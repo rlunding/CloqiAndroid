@@ -37,7 +37,7 @@ public class YouPayEventImpl implements YouPayEvent{
     private ArrayList<YouPay> payList;
     private double totalExpenses;
     private double pricePrPerson;
-    private int color;
+    private String color;
     private boolean whopaywhoCalculated;
 
     /**
@@ -47,7 +47,7 @@ public class YouPayEventImpl implements YouPayEvent{
      * @param name of the event
      * @param currency of the event
      */
-    public YouPayEventImpl(String name, Currency currency, int color) {
+    public YouPayEventImpl(String name, Currency currency, String color) {
         super();
         this.name = name;
         this.currency = currency;
@@ -99,7 +99,7 @@ public class YouPayEventImpl implements YouPayEvent{
     }
 
     @Override
-    public int getColor() {
+    public String getColor() {
         return color;
     }
 
@@ -109,7 +109,7 @@ public class YouPayEventImpl implements YouPayEvent{
     }
 
     @Override
-    public void setColor(int color) {
+    public void setColor(String color) {
         this.color = color;
     }
 

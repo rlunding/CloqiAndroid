@@ -13,9 +13,9 @@ public interface YouPayEvent {
     public double getTotalExpenses();
     public ArrayList<Person> getPersons();
     public ArrayList<Expense> getExpenses();
-    public int getColor();
+    public String getColor();
     public void setName(String name);
-    public void setColor(int color);
+    public void setColor(String color);
     public void setCurrency(Currency c);
     public boolean addPerson(Person p);
     public boolean removePerson(Person p);

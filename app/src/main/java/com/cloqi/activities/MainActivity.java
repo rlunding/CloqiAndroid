@@ -141,6 +141,8 @@ public class MainActivity extends Activity {
                 fragment = new WelcomeFragment();
                 break;
             case 2:
+                fragment = new EventViewFragment();
+                break;
             case 3:
             case 4:
             case 5:
