@@ -20,10 +20,10 @@ import java.util.HashMap;
 /**
  * Created by Lunding on 12/04/15.
  */
-public class WelcomeFragment extends Fragment{
+public class UserFragment extends Fragment{
 
     //Constants
-    private static final String TAG = WelcomeFragment.class.getSimpleName();
+    private static final String TAG = UserFragment.class.getSimpleName();
 
     //Fields
     private TextView txtName;
@@ -33,14 +33,14 @@ public class WelcomeFragment extends Fragment{
     private SQLiteHandler db;
     private SessionManager session;
 
-    public WelcomeFragment(){
+    public UserFragment(){
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "Register Fragment initializing...");
-        View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_user, container, false);
 
         //Input components
         txtName = (TextView) rootView.getRootView().findViewById(R.id.name);

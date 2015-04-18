@@ -138,13 +138,17 @@ public class MainActivity extends Activity {
                 fragment = new HomeFragment();
                 break;
             case 1:
-                fragment = new WelcomeFragment();
-                break;
-            case 2:
                 fragment = new EventViewFragment();
                 break;
+            case 2:
+                fragment = new NewEventFragment();
+                break;
             case 3:
+                fragment = new UserFragment();
+                break;
             case 4:
+                fragment = new PreferencesFragment();
+                break;
             case 5:
                 fragment = new HomeFragment();
                 break;
