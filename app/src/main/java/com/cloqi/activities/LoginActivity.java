@@ -129,7 +129,6 @@ public class LoginActivity extends Activity {
                         session.setLogin(true);
                         //and store user
                         db.addLogin(json);
-                        db.addEvent("", "Ferie", "DKK", "#555555");
 
                         //Launch main activity
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

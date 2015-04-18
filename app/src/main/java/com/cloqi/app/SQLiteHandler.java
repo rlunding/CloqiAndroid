@@ -3,6 +3,7 @@ package com.cloqi.app;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -30,7 +31,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     //Constants
     public static final String TAG = SQLiteHandler.class.getSimpleName();
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 14;
     private static final String DATABASE_NAME = "cloqi";
     private static final String TABLE_LOGIN = "login";
     private static final String TABLE_EVENT = "events";
@@ -196,7 +197,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         long db_id = db.update(TABLE_LOGIN, values, whereClause, null);//Updateing row
         db.close(); //Closing database connection
-        Log.d(TAG, "New user inserted into sqlite: " + db_id);
+        Log.d(TAG, "Token set into sqlite: " + db_id);
     }
 
     /**
@@ -305,6 +306,47 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
 
+
+    public void updateEventName(String id, String name) {
+        Log.d(TAG, "Updating event name:" + name + ", for event: " + id);
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EVENT_NAME, name);
+        String whereClause = KEY_EVENT_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EVENT, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Event name updated in sqlite: " + db_id);
+    }
+
+    public void updateEventCurrency(String id, String currency) {
+        Log.d(TAG, "Updating event currency" + currency + ", for event: " + id);
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EVENT_CURRENCY, currency);
+        String whereClause = KEY_EVENT_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EVENT, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Event currency updated in sqlite: " + db_id);
+    }
+
+    public void updateEventColor(String id, String color) {
+        Log.d(TAG, "Updating event color:" + color + ", for event: " + id);
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EVENT_COLOR, color);
+        String whereClause = KEY_EVENT_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EVENT, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Event color updated in sqlite: " + db_id);
+    }
+
+
     /**
      * ****************************************
      * ************** CURRENCY ****************
@@ -341,6 +383,43 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      * **************** USERS *****************
      * ****************************************
      */
+
+    /**
+     * Storing user details in database
+     */
+    public void addUser(String id, String name, String email) {
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(KEY_USER_DB_ID, id);
+            values.put(KEY_USER_REAL_NAME, name);
+            values.put(KEY_USER_EMAIL, email);
+
+            long db_id = db.insertOrThrow(TABLE_USERS, null, values); //inserting row
+            db.close(); //Closing database connection
+            Log.d(TAG, "New user inserted into sqlite: " + db_id);
+        } catch (Exception e){
+            Log.d(TAG, "User already in database");
+        }
+    }
+
+    /**
+     * Storing user details from JSON object
+     */
+    public void addUser(JSONObject json) {
+        //User successfully stored in MySQL, now store the user in sqlite
+        try {
+            JSONObject user = json.getJSONObject("user");
+            String id = user.getString("user_id");
+            String name = user.getString("user_name");
+            String email = user.getString("user_email");
+            //Inserted row in users table
+            addUser(id, name, email);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
     public ArrayList<Person> getUsers(){
         ArrayList<Person> persons = new ArrayList<>();
@@ -401,9 +480,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         return persons;
     }
 
-
-
-    public Person getPerson(String email) {
+    public Person getUser(String email) {
         Person person = null;
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE " + KEY_USER_EMAIL + "=?";
@@ -432,8 +509,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             expenses.add(new ExpenseImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_DB_ID)),
+                    cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
-                    getPerson(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
+                    getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
                     cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
                     getUsersForExpense(id)
@@ -451,8 +530,30 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, new String[]{id});
         if (cursor.moveToFirst()) {
             expense = new ExpenseImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_DB_ID)),
+                    cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
                     cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
-                    getPerson(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
+                    getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
+                    cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
+                    getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
+                    getUsersForExpense(id)
+            );
+        }
+        cursor.close();
+        return expense;
+    }
+
+    public Expense getExpenseByEventId(String id) {
+        Expense expense = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + KEY_EVENT_DB_ID + "=?";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{id});
+        if (cursor.moveToFirst()) {
+            expense = new ExpenseImpl(
+                    cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_DB_ID)),
+                    cursor.getString(cursor.getColumnIndex(KEY_EVENT_DB_ID)),
+                    cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_TITLE)),
+                    getUser(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_PAYER_EMAIL))),
                     cursor.getInt(cursor.getColumnIndex(KEY_EXPENSE_AMOUNT)),
                     getCurrency(cursor.getString(cursor.getColumnIndex(KEY_EXPENSE_CURRENCY))),
                     getUsersForExpense(id)
@@ -469,6 +570,42 @@ public class SQLiteHandler extends SQLiteOpenHelper {
             output[i] = expenses.get(i).getTitle();
         }
         return output;
+    }
+
+    public void updateExpenseTitle(String id, String title) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EXPENSE_TITLE, title);
+        String whereClause = KEY_EXPENSE_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EXPENSE, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "expense title updated in sqlite: " + db_id);
+    }
+
+    public void updateExpenseAmount(String id, int amount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EXPENSE_AMOUNT, amount);
+        String whereClause = KEY_EXPENSE_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EXPENSE, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Expense amount updated in sqlite: " + db_id);
+    }
+
+    public void updateExpenseCurrency(String id, String currency) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EXPENSE_CURRENCY, currency);
+        String whereClause = KEY_EXPENSE_DB_ID + "=" + id;
+
+        long db_id = db.update(TABLE_EXPENSE, values, whereClause, null);//Updateing row
+        db.close(); //Closing database connection
+        Log.d(TAG, "Expense currency updated in sqlite: " + db_id);
     }
 
 }

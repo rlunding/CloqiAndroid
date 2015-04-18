@@ -22,6 +22,8 @@ import java.util.ArrayList;
  */
 public class ExpenseImpl implements Expense{
 
+    private String DBid;
+    private String eventDBid;
     private String title;
     private Person person;
     private double amount;
@@ -35,13 +37,25 @@ public class ExpenseImpl implements Expense{
      * @param amount
      * @param currency
      */
-    public ExpenseImpl(String title, Person person, double amount, Currency currency, ArrayList<Person> spenders) {
+    public ExpenseImpl(String DBid, String eventDBid, String title, Person person, double amount, Currency currency, ArrayList<Person> spenders) {
         super();
+        this.DBid = DBid;
+        this.eventDBid = eventDBid;
         this.title = title;
         this.person = person;
         this.amount = amount;
         this.currency = currency;
         this.spenders = spenders;
+    }
+
+    @Override
+    public String getDBid() {
+        return DBid;
+    }
+
+    @Override
+    public String getEventDBId() {
+        return eventDBid;
     }
 
     @Override

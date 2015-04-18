@@ -3,6 +3,7 @@ package com.cloqi.gui;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,8 +65,16 @@ public class EventAdapter extends BaseAdapter{
         picture = (ImageView)v.getTag(R.id.picture);
         name = (TextView)v.getTag(R.id.text);
 
-        YouPayEvent item = (YouPayEvent)getItem(position);
-        picture.setImageDrawable(new ColorDrawable(Color.parseColor("#345330")));
+        YouPayEvent item = (YouPayEvent) getItem(position);
+        Log.d(TAG, "Event to be displayed: " + item);
+        int color;
+        try {
+            color = Color.parseColor(item.getColor());
+        } catch (IllegalArgumentException e){
+            Log.d(TAG, "Invalid color:" + item.getColor());
+            color = Color.parseColor("#ffffff");
+        }
+        picture.setImageDrawable(new ColorDrawable(color));
         name.setText(item.getName());
 
         return v;

@@ -45,6 +45,7 @@ public class EventViewFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Toast.makeText(getActivity(), "" + position, Toast.LENGTH_SHORT).show();
                 YouPayEvent event = (YouPayEvent) adapter.getItem(position);
+                Log.d(TAG, "Going to edit: " + event);
                 EventEditFragment fragment = EventEditFragment.newInstance(event.getDBid());
                 getFragmentManager().beginTransaction()
                         .replace(R.id.frame_container, fragment).addToBackStack("")

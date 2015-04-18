@@ -29,7 +29,6 @@
             android:inputType="text"
             android:textColor="@color/input_new_event"
             android:textColorHint="@color/input_new_event_hint" >
-            <requestFocus android:layout_width="wrap_content" />
         </EditText>
 
         <Spinner
@@ -42,6 +41,36 @@
             android:singleLine="true"
             android:textColor="@color/input_new_event"/>
 
+        <EditText
+            android:id="@+id/event_edit_color"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:hint="#Color"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="text"
+            android:textColor="@color/input_new_event"
+            android:textColorHint="@color/input_new_event_hint" />
+
+        <ListView
+            android:id="@+id/event_list_expenses"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/input_new_event_bg"
+            android:textColor="@color/white">
+        </ListView>
+
+        <Button
+            android:id="@+id/btnAddExpense"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@color/input_new_event_bg"
+            android:text="Create expense"
+            android:textColor="@color/white" />
+
 
         <EditText
             android:id="@+id/event_edit_total_expenses"
@@ -49,23 +78,12 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@color/input_new_event_bg"
-            android:hint="@string/HINT_EVENT_NAME"
+            android:hint="total expenses"
             android:padding="10dp"
             android:singleLine="true"
-            android:inputType="textCapWords"
+            android:inputType="none"
             android:textColor="@color/input_new_event"
             android:textColorHint="@color/input_new_event_hint" />
-
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/event_list_expenses"
-            android:layout_marginTop="200dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true">
-        </ListView>
-
-
 
         </LinearLayout>
 

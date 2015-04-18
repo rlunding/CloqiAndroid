@@ -1,7 +1,9 @@
 package com.cloqi.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +14,20 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Request.Method;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.cloqi.R;
 import com.cloqi.activities.MainActivity;
+import com.cloqi.app.AppConfig;
+import com.cloqi.app.AppController;
 import com.cloqi.app.SQLiteHandler;
+import com.cloqi.gui.HelperMethods;
+import com.cloqi.youpayframework.Person;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -65,13 +78,14 @@ public class NewEventFragment extends Fragment {
         db = new SQLiteHandler(getActivity().getApplicationContext());
 
         //Initialize input_currency spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item, db.getCurrencyNames());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         input_currency.setAdapter(adapter);
 
         frindList = new ArrayList<>();
-        friendListAdapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_spinner_item, frindList);
+        friendListAdapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, frindList);
         friendListView.setAdapter(friendListAdapter);
 
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
@@ -88,7 +102,7 @@ public class NewEventFragment extends Fragment {
             }
         });
 
-
+        HelperMethods.setupUIRemoveKeyboardOnTouch(rootView, getActivity());
         return rootView;
     }
 
@@ -98,12 +112,12 @@ public class NewEventFragment extends Fragment {
         String currency = input_currency.getSelectedItem().toString();
         String color = input_color.getText().toString();
 
-        String color_pattern = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
+        String color_pattern = "^#([A-Fa-f0-9]{6})$";
         Pattern pattern = Pattern.compile(color_pattern);
         Matcher matcher = pattern.matcher(color);
 
         if (!name.isEmpty() && !currency.isEmpty() && matcher.matches()){
-            db.addEvent(String.valueOf(Math.random()*10000), name, currency, color);
+            db.addEvent(String.valueOf((int) (Math.random()*10000)), name, currency, color);
             Toast.makeText(getActivity(), "Event created", Toast.LENGTH_LONG).show();
             MainActivity ma = (MainActivity) getActivity();
             ma.displayView(1);
@@ -113,10 +127,55 @@ public class NewEventFragment extends Fragment {
     }
 
     private void addFriend(){
-        String email = input_email.getText().toString();
+        String tag_string_req = "req_get_user";
+        final String email = input_email.getText().toString();
 
-        if (!email.isEmpty()){
-            frindList.add(email);
+        final Person person = db.getUser(email);
+        if (person == null){
+            if (!email.isEmpty()){
+                String uri = String.format(AppConfig.URL_GET_USER + "?tag=get_user&user_email=%1$s",
+                        email);
+                StringRequest strReq = new StringRequest(Method.GET,
+                        uri, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, "Get user response: " + response);
+
+                        try {
+                            JSONObject json = new JSONObject(response);
+                            boolean error = json.getBoolean("error");
+
+                            //Check for error node in json
+                            if (!error){
+                                db.addUser(json);
+                                JSONObject user = json.getJSONObject("user");
+                                Person person = db.getUser(user.getString("user_email"));
+                                frindList.add(person.toString());
+                                friendListAdapter.notifyDataSetChanged();
+                                input_email.setText("");
+                            } else {
+                                //Error in login. Get the error message
+                                String errorMsg = json.getString("error_msg");
+                                Toast.makeText(getActivity().getApplicationContext(),
+                                        errorMsg, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e){
+                            //JSON error
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Connection error: " + error.getMessage());
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+                AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+            }
+        } else {
+            frindList.add(person.toString());
             friendListAdapter.notifyDataSetChanged();
             input_email.setText("");
         }

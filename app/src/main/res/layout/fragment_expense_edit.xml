@@ -1,54 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bg_gradient"
+    android:gravity="center"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/bg_main"
-    tools:context=".YouPayActivity$ExpenseEditFragment">
+    android:padding="10dp">
 
-    <EditText
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/expense_edit_title"
-        android:hint="Expense"
-        android:textColor="@color/white"
-        android:layout_marginTop="50dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
-        <requestFocus android:layout_width="wrap_content" />
-    </EditText>
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp" >
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:ems="10"
-        android:id="@+id/expense_edit_amount"
-        android:hint="Amount"
-        android:textColor="@color/white"
-        android:layout_marginTop="100dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
-    </EditText>
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/expense_edit_currency"
-        android:layout_marginTop="150dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"  />
+        <EditText
+            android:id="@+id/expense_edit_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:hint="Title"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="textCapWords"
+            android:textColor="@color/input_new_event"
+            android:textColorHint="@color/input_new_event_hint" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/expense_edit_person"
-        android:layout_marginTop="200dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"  />
 
-</RelativeLayout>
+        <EditText
+            android:id="@+id/expense_edit_amount"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:hint="Amount"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="number"
+            android:textColor="@color/input_new_event"
+            android:textColorHint="@color/input_new_event_hint" />
+
+        <Spinner
+            android:id="@+id/expense_edit_currency"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/input_new_event_bg"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:textColor="@color/input_new_event"/>
+
+        <ListView
+            android:id="@+id/expense_edit_persons_in"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/input_new_event_bg"
+            android:textColor="@color/white">
+        </ListView>
+
+        <ListView
+            android:id="@+id/expense_edit_persons_out"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/input_new_event_bg"
+            android:textColor="@color/white">
+        </ListView>
+
+    </LinearLayout>
+
+</LinearLayout>

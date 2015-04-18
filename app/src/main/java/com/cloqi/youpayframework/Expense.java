@@ -8,6 +8,8 @@ import java.util.ArrayList;
  */
 public interface Expense {
 
+    public String getDBid();
+    public String getEventDBId();
     public String getTitle();
     public Person getPayer();
     public double getAmount();

@@ -6,16 +6,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 
 
 import com.cloqi.R;
 import com.cloqi.app.AppConfig;
+import com.cloqi.app.SQLiteHandler;
 import com.cloqi.gui.HelperMethods;
 import com.cloqi.youpayframework.Expense;
+import com.cloqi.youpayframework.Person;
 import com.cloqi.youpayframework.YouPayEvent;
+
+import java.util.ArrayList;
 
 /**
  * Created by Lunding on 08/02/15.
@@ -28,16 +34,21 @@ public class ExpenseEditFragment extends Fragment {
     //Fields
     private EditText expenseTitle;
     private EditText expenseAmount;
-    private Spinner currency;
-    private Spinner person;
-    private YouPayEvent event;
+    private Spinner expenseCurrency;
+    private ListView personsIn;
+    private ListView personsOut;
     private Expense expense;
 
-    public static ExpenseEditFragment newInstance(int eventId, int expenseId){
+    private ArrayAdapter<String> currencyAdapter;
+    private ArrayAdapter<Person> personsInAdapter;
+    private ArrayAdapter<Person> personsOutAdapter;
+
+    private SQLiteHandler db;
+
+    public static ExpenseEditFragment newInstance(String expenseId){
         ExpenseEditFragment output = new ExpenseEditFragment();
         Bundle args = new Bundle();
-        args.putInt(AppConfig.EVENT_KEY, eventId);
-        args.putInt(AppConfig.EXPENSE_KEY, expenseId);
+        args.putString(AppConfig.EXPENSE_KEY, expenseId);
         output.setArguments(args);
         return output;
     }
@@ -49,33 +60,73 @@ public class ExpenseEditFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_expense_edit, container, false);
         expenseTitle = (EditText) rootView.getRootView().findViewById(R.id.expense_edit_title);
         expenseAmount = (EditText) rootView.getRootView().findViewById(R.id.expense_edit_amount);
-        currency = (Spinner) rootView.getRootView().findViewById(R.id.expense_edit_currency);
-        person = (Spinner) rootView.getRootView().findViewById(R.id.expense_edit_person);
+        expenseCurrency = (Spinner) rootView.getRootView().findViewById(R.id.expense_edit_currency);
+        personsIn = (ListView) rootView.getRootView().findViewById(R.id.expense_edit_persons_in);
+        personsOut = (ListView) rootView.getRootView().findViewById(R.id.expense_edit_persons_out);
 
-        /*
+        //Get database
+        db = new SQLiteHandler(getActivity().getApplicationContext());
+
         //Initialize currency spinner
-        ArrayAdapter<String> currencyAdapter = new ArrayAdapter<>(getActivity(),
-                        android.R.layout.simple_spinner_item, data.generateCurrencyArray());
+        currencyAdapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_spinner_item, db.getCurrencyNames());
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        currency.setAdapter(currencyAdapter);
+        expenseCurrency.setAdapter(currencyAdapter);
 
         //Initialize event, and set gui elements with data.
         Bundle args = getArguments();
-        event = data.getEvent(args.getInt(AppConstants.EVENT_KEY));
-        expense = event.getExpenses().get(args.getInt(AppConstants.EXPENSE_KEY));
-        expenseTitle.setText(expense.getTitle());
-        expenseAmount.setText(expense.getAmount()+" " + expense.getCurrency().getCode());
-        currency.setSelection(data.getIndexOfCurrency(expense.getCurrency()));
+        expense = db.getExpense(args.getString(AppConfig.EXPENSE_KEY));
+        setContent(expense);
 
         //Initialize person spinner
-        ArrayAdapter<String> personAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_spinner_item, data.generatePersonArray(data.getIndexOfEvent(event)));
-        personAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        person.setAdapter(personAdapter);
-        person.setSelection(event.getPersons().indexOf(expense.getPerson()));
+        ArrayList<Person> users = db.getUsersForEvent(expense.getEventDBId());
+        ArrayList<Person> spenders = expense.getSpenders();
+        users.removeAll(spenders);
+
+        personsInAdapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, spenders);
+        personsIn.setAdapter(personsInAdapter);
+
+        personsOutAdapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, users);
+        personsIn.setAdapter(personsInAdapter);
+
+        personsIn.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, personsInAdapter.getItem(position) + " should be moved");
+            }
+        });
 
         HelperMethods.setupUIRemoveKeyboardOnTouch(rootView, getActivity());
-        Log.d(TAG, "Expense edit Fragment initialized");*/
+        Log.d(TAG, "Expense edit Fragment initialized");
         return rootView;
+    }
+
+    /*
+     * -------------------------------------------------------------------------------------------
+     * ------------------------------------- GUI HELPER METHODS ----------------------------------
+     * -------------------------------------------------------------------------------------------
+     */
+
+    private void setContent(Expense expense){
+        setExpenseTitle(expense.getTitle());
+        setExpenseCurrency(expense.getCurrency().getCode());
+        setExpenseAmount((int) expense.getAmount());
+    }
+
+    private void setExpenseTitle(String title){
+        expenseTitle.setText(title);
+    }
+
+    private void setExpenseCurrency(String value){
+        if (value != null){
+            int position = currencyAdapter.getPosition(value);
+            expenseCurrency.setSelection(position);
+        }
+    }
+
+    private void setExpenseAmount(int amount){
+        expenseAmount.setText(amount);
     }
 }

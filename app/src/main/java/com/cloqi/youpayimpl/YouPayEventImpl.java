@@ -67,10 +67,6 @@ public class YouPayEventImpl implements YouPayEvent{
         return DBid;
     }
 
-    @Override
-    public void setDBid(String DBid){
-        this.DBid = DBid;
-    }
 
     @Override
     public String getName() {
@@ -135,6 +131,16 @@ public class YouPayEventImpl implements YouPayEvent{
     public boolean removeExpense(Expense e){
         whopaywhoCalculated = false;
         return expenses.remove(e);
+    }
+
+    @Override
+    public String toString() {
+        return "YouPayEventImpl{" +
+                "DBid='" + DBid + '\'' +
+                ", name='" + name + '\'' +
+                ", currency=" + currency +
+                ", color='" + color + '\'' +
+                '}';
     }
 
     @Override
