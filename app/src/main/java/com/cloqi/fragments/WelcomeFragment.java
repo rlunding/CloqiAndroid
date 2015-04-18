@@ -59,8 +59,10 @@ public class WelcomeFragment extends Fragment{
 
         //Fetching user details from sqlite
         HashMap<String, String> user = db.getUserDetails();
-        String name = user.get("name");
-        String email = user.get("email");
+        String id = user.get(SQLiteHandler.KEY_USER_ID);
+        String name = user.get(SQLiteHandler.KEY_NAME);
+        String email = user.get(SQLiteHandler.KEY_EMAIL);
+        String token = user.get(SQLiteHandler.KEY_TOKEN);
 
         //Display the user details on the screen
         txtName.setText(name);

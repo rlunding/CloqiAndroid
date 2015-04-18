@@ -39,6 +39,7 @@ public class RegisterActivity extends Activity{
     private Button btnRegister;
     private Button btnLinkToLogin;
     private EditText inputFullName;
+    private EditText inputUsername;
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog progressDialog;
@@ -52,7 +53,8 @@ public class RegisterActivity extends Activity{
         getActionBar().hide();
 
         //Input components
-        inputFullName = (EditText) findViewById(R.id.name);
+        inputFullName = (EditText) findViewById(R.id.real_name);
+        inputUsername = (EditText) findViewById(R.id.name);
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
         btnRegister = (Button) findViewById(R.id.btnRegister);
@@ -80,12 +82,13 @@ public class RegisterActivity extends Activity{
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = inputFullName.getText().toString();
+                String realName = inputFullName.getText().toString();
+                String username = inputUsername.getText().toString();
                 String email = inputEmail.getText().toString();
                 String password = inputPassword.getText().toString();
 
-                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-                    registerUser(name, email, password);
+                if (!realName.isEmpty() && !username.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
+                    registerUser(realName, username, email, password);
                 } else {
                     Toast.makeText(getApplicationContext(),
                             "Please enter your details!", Toast.LENGTH_LONG)
@@ -106,7 +109,7 @@ public class RegisterActivity extends Activity{
         });
     }
 
-    private void registerUser(final String name, final String email, final String password){
+    private void registerUser(final String realName, final String username, final String email, final String password){
         //Tag used to cancel the request
         String tag_string_req = "req_register";
 
@@ -124,6 +127,8 @@ public class RegisterActivity extends Activity{
                     JSONObject json = new JSONObject(response);
                     boolean error = json.getBoolean("error");
                     if (!error){
+                        Toast.makeText(getApplicationContext(),
+                                R.string.MESSAGE_REGISTER_SUCCESS, Toast.LENGTH_LONG).show();
                         //Launch login activity
                         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(intent);
@@ -152,9 +157,11 @@ public class RegisterActivity extends Activity{
                 // Posting params to register url
                 Map<String, String> params = new HashMap<>();
                 params.put("tag", "register");
-                params.put("name", name);
-                params.put("email", email);
-                params.put("password", password);
+                params.put("user_real_name", realName);
+                params.put("user_name", username);
+                params.put("user_email", email);
+                params.put("user_password_new", password);
+                params.put("user_password_repeat", password);
 
                 return params;
             }

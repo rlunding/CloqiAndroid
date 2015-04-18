@@ -25,10 +25,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String TABLE_LOGIN = "login";
 
     private static final String KEY_ID = "id";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_EMAIL = "email";
-    private static final String KEY_UID = "uid";
-    private static final String KEY_CREATED_AT = "created_at";
+    public static final String KEY_USER_ID = "user_id";
+    public static final String KEY_NAME = "user_name";
+    public static final String KEY_EMAIL = "user_email";
+    public static final String KEY_TOKEN = "token";
 
     //Fields
 
@@ -42,8 +42,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db){
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_LOGIN + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
-                + KEY_CREATED_AT + " TEXT" + ")";
+                + KEY_EMAIL + " TEXT UNIQUE," + KEY_TOKEN + " TEXT,"
+                + KEY_USER_ID + " TEXT" + ")";
         db.execSQL(CREATE_LOGIN_TABLE);
         Log.d(TAG, "Database tables created");
     }
@@ -60,18 +60,18 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     /**
      * Storing user details in database
      */
-    public void addUser(String name, String email, String uid, String created_at){
+    public void addUser(String id, String name, String email, String token){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_USER_ID, id);
         values.put(KEY_NAME, name);
         values.put(KEY_EMAIL, email);
-        values.put(KEY_UID, uid);
-        values.put(KEY_CREATED_AT, created_at);
+        values.put(KEY_TOKEN, token);
 
-        long id = db.insert(TABLE_LOGIN, null, values); //inserting row
+        long db_id = db.insert(TABLE_LOGIN, null, values); //inserting row
         db.close(); //Closing database connection
-        Log.d(TAG, "New user inserted into sqlite: " + id);
+        Log.d(TAG, "New user inserted into sqlite: " + db_id);
     }
 
     /**
@@ -80,16 +80,20 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public void addUser(JSONObject json){
         //User successfully stored in MySQL, now store the user in sqlite
         try {
-            String uid = json.getString("uid");
+            String token = json.getString("token");
             JSONObject user = json.getJSONObject("user");
+            String id = user.getString("id");
             String name = user.getString("name");
             String email = user.getString("email");
-            String created_at = user.getString("created_at");
             //Inserted row in users table
-            addUser(name, email, uid, created_at);
+            addUser(id, name, email, token);
         } catch (JSONException e){
             e.printStackTrace();
         }
+    }
+
+    public void setToken(String token){
+        //TODO:: update token insert
     }
 
     /**
@@ -103,10 +107,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
         cursor.moveToFirst(); //get first user
         if (cursor.getCount() > 0){
-            user.put("name", cursor.getString(1));
-            user.put("email", cursor.getString(2));
-            user.put("uid", cursor.getString(3));
-            user.put("created_at", cursor.getString(4));
+            user.put(KEY_NAME, cursor.getString(1));
+            user.put(KEY_EMAIL, cursor.getString(2));
+            user.put(KEY_TOKEN, cursor.getString(3));
+            user.put(KEY_USER_ID, cursor.getString(4));
         }
         cursor.close();
         db.close();
@@ -136,6 +140,4 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.close();
         Log.d(TAG, "Deleted all user info from sqlite");
     }
-
-
 }

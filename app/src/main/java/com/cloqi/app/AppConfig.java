@@ -7,7 +7,7 @@ package com.cloqi.app;
 public class AppConfig {
 
     //Server user login url
-    public static String URL_LOGIN = "http://cloqi.com/";
+    public static String URL_LOGIN = "http://cloqi.com/api.php";
     //Server user register url
-    public static String URL_REGISTER = "http://cloqi.com/";
+    public static String URL_REGISTER = "http://cloqi.com/api.php";
 }

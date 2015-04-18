@@ -159,8 +159,9 @@ public class LoginActivity extends Activity {
               // Posting parameters to login url
               Map<String, String> params = new HashMap<>();
               params.put("tag", "login");
-              params.put("email", email);
-              params.put("password", password);
+              params.put("user_name", email);
+              params.put("user_password", password);
+              params.put("user_rememberme", "true");
 
               return params;
           }
