@@ -15,4 +15,9 @@ public class AppConfig {
 
     public final static String EVENT_KEY = "EVENT_ID";
     public final static String EXPENSE_KEY = "EXPENSE_ID";
+
+    public final static String EVENT_NEW_FRAGMENT_KEY = "EVENT_EDIT_FRAGMENT";
+    public final static String EVENT_EDIT_FRAGMENT_KEY = "EVENT_NEW_FRAGMENT";
+    public final static String EXPENSE_NEW_FRAGMENT_KEY = "EXPENSE_EDIT_FRAGMENT";
+    public final static String EXPENSE_EDIT_FRAGMENT_KEY = "EXPENSE_NEW_FRAGMENT";
 }

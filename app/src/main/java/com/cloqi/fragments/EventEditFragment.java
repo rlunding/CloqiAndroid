@@ -43,6 +43,7 @@ public class EventEditFragment extends Fragment {
     private Button btnAddExpense;
     private EditText totalAmount;
     private YouPayEvent event;
+    private String eventDBid;
 
     private ArrayAdapter<String> currencyAdapter;
     private ArrayAdapter<Expense> expensesAdapter;
@@ -83,7 +84,8 @@ public class EventEditFragment extends Fragment {
         currency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "" + position, Toast.LENGTH_SHORT).show();
+                saveEvent();
+                load();
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -93,13 +95,8 @@ public class EventEditFragment extends Fragment {
 
         //Initialize event, and set gui elements with data.
         Bundle args = getArguments();
-        event = db.getEvent(args.getString(AppConfig.EVENT_KEY), true);
-        HelperMethods.printEventInLog(TAG, event);
-        event.calculateWhoPayWho();
-        setEventName(event.getName());
-        setEventColor(event.getColor());
-        setCurrency(event.getCurrency().getCode());
-        setTotalAmount();
+        eventDBid = args.getString(AppConfig.EVENT_KEY);
+        load();
 
         //Initialize expenses list
         expensesAdapter = new ArrayAdapter<>(getActivity(),
@@ -111,7 +108,7 @@ public class EventEditFragment extends Fragment {
                 Expense expense = expensesAdapter.getItem(position);
                 ExpenseEditFragment fragment = ExpenseEditFragment.newInstance(expense.getDBid());
                 getFragmentManager().beginTransaction()
-                        .add(R.id.frame_container, fragment).addToBackStack("")
+                        .replace(R.id.frame_container, fragment).addToBackStack(AppConfig.EXPENSE_EDIT_FRAGMENT_KEY)
                         .commit();
             }
         });
@@ -122,7 +119,7 @@ public class EventEditFragment extends Fragment {
                 Log.d(TAG, "New expense button clicked");
                 ExpenseNewFragment fragment = ExpenseNewFragment.newInstance(event.getDBid());
                 getFragmentManager().beginTransaction()
-                        .add(R.id.frame_container, fragment).addToBackStack("")
+                        .replace(R.id.frame_container, fragment).addToBackStack(AppConfig.EXPENSE_EDIT_FRAGMENT_KEY)
                         .commit();
             }
         });
@@ -133,9 +130,17 @@ public class EventEditFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        Log.d("DEBUG", "On resume of Event edit fragment");
+        load();
+        super.onResume();
+    }
+
+    @Override
     public void onPause() {
         Log.d(TAG, "On Pause of Event edit Fragment");
         saveEvent();
+        load();
         super.onPause();
     }
 
@@ -144,6 +149,15 @@ public class EventEditFragment extends Fragment {
      * ------------------------------------- EVENT METHODS ---------------------------------------
      * -------------------------------------------------------------------------------------------
      */
+
+    private void load(){
+        event = db.getEvent(eventDBid, true);
+        event.calculateWhoPayWho();
+        setEventName(event.getName());
+        setEventColor(event.getColor());
+        setCurrency(event.getCurrency().getCode());
+        setTotalAmount();
+    }
 
     private void saveEvent(){
         String name = eventName.getText().toString();
@@ -203,6 +217,6 @@ public class EventEditFragment extends Fragment {
     }
 
     private void setTotalAmount(){
-        totalAmount.setText("Total: " + getTotalAmountString());
+        totalAmount.setText(getTotalAmountString());
     }
 }

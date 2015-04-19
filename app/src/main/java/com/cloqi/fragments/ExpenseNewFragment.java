@@ -47,6 +47,7 @@ public class ExpenseNewFragment extends Fragment {
 
     private SQLiteHandler db;
 
+
     public static ExpenseNewFragment newInstance(String eventId){
         ExpenseNewFragment output = new ExpenseNewFragment();
         Bundle args = new Bundle();
@@ -127,6 +128,8 @@ public class ExpenseNewFragment extends Fragment {
         return rootView;
     }
 
+
+
     private void createNewExpense(){
         String title = expenseTitle.getText().toString();
         String amountString = expenseAmount.getText().toString();
@@ -139,7 +142,10 @@ public class ExpenseNewFragment extends Fragment {
                 db.addUserToExpense(personsInAdapter.getItem(i).getDBid(), DBid);
             }
             Log.d(TAG, "New expense created");
-            getActivity().getFragmentManager().beginTransaction().remove(this).commit();
+            EventEditFragment fragment = EventEditFragment.newInstance(event.getDBid());
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.frame_container, fragment).addToBackStack(AppConfig.EVENT_EDIT_FRAGMENT_KEY)
+                    .commit();
         } else {
             Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_LONG).show();
             Log.d(TAG, "Invalid input");

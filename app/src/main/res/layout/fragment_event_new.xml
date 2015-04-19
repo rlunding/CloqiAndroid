@@ -17,6 +17,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp" >
 
+
         <TextView
             android:id="@+id/txtLabel"
             android:layout_width="fill_parent"
@@ -25,6 +26,11 @@
             android:padding="10dp"
             android:textSize="25dp"
             android:text="Create new event"/>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Title:"/>
 
         <EditText
             android:id="@+id/new_event_name"
@@ -39,6 +45,11 @@
             android:textColor="@color/input_new_event"
             android:textColorHint="@color/input_new_event_hint" />
 
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Currency:"/>
+
         <Spinner
             android:id="@+id/new_event_currency"
             android:layout_width="fill_parent"
@@ -48,6 +59,11 @@
             android:padding="10dp"
             android:singleLine="true"
             android:textColor="@color/input_new_event"/>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Color:"/>
 
         <EditText
             android:id="@+id/new_event_color"
@@ -65,8 +81,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp">
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/new_event_friend_email"
@@ -94,13 +109,24 @@
 
             </LinearLayout>
 
-        <ListView
-            android:id="@+id/new_event_friends"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/input_new_event_bg"
-            android:textColor="@color/white">
-        </ListView>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="85dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Friends added (press to remove):"/>
+
+            <ListView
+                android:id="@+id/new_event_friends"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/input_new_event_bg"
+                android:textColor="@color/white">
+            </ListView>
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnNewEvent"

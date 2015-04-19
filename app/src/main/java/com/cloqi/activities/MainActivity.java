@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
                 fragment = new UserFragment();
                 break;
             case 4:
-                fragment = new PreferencesFragment();
+                fragment = new PrefFragment();
                 break;
             case 5:
                 fragment = new AboutFragment();
@@ -194,6 +194,4 @@ public class MainActivity extends Activity {
         // Pass any configuration change to the drawer toggls
         drawerToggle.onConfigurationChanged(newConfig);
     }
-
-
 }

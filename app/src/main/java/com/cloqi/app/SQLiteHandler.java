@@ -501,8 +501,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<Person> getUsersForEvent(String id){
-
-        printUserEvent();
+        //printUserEvent();
         ArrayList<Person> persons = new ArrayList<>();
         /*String selectQuery = "SELECT * FROM " + TABLE_USERS + " " + TABLE_EVENT_USER
                 + " WHERE " + TABLE_USERS + "." + KEY_USER_DB_ID + " = " + TABLE_EVENT_USER + "." + KEY_USER_DB_ID
@@ -529,7 +528,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<Person> getUsersForExpense(String id){
-        printUserExpenses();
+        //printUserExpenses();
         ArrayList<Person> persons = new ArrayList<>();
         String selectQuery = "SELECT tu.* FROM " + TABLE_USERS + " tu, " + TABLE_EXPENSE_USER + " teu"
                 + " WHERE tu." + KEY_USER_DB_ID + " = teu." + KEY_USER_DB_ID

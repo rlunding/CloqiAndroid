@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="PreferenceCategory A">
+
+        <CheckBoxPreference
+            android:key="checkbox_preference"
+            android:title="title"
+            android:summary="summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="PreferenceCategory B">
+
+        <EditTextPreference
+            android:key="edittext_preference1"
+            android:title="title"
+            android:summary="summary"
+            android:dialogTitle="dialog title" />
+
+        <EditTextPreference
+            android:key="edittext_preference2"
+            android:title="title"
+            android:summary="summary"
+            android:dialogTitle="dialog title" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

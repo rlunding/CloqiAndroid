@@ -17,6 +17,19 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp" >
 
+        <TextView
+            android:id="@+id/txtLabel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"
+            android:textSize="25dp"
+            android:text="Create new expense"/>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Title:"/>
 
         <EditText
             android:id="@+id/expense_new_title"
@@ -31,6 +44,10 @@
             android:textColor="@color/input_new_event"
             android:textColorHint="@color/input_new_event_hint" />
 
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Amount:"/>
 
         <EditText
             android:id="@+id/expense_new_amount"
@@ -44,6 +61,11 @@
             android:inputType="number"
             android:textColor="@color/input_new_event"
             android:textColorHint="@color/input_new_event_hint" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Currency:"/>
 
         <Spinner
             android:id="@+id/expense_new_currency"
