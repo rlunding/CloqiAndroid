@@ -149,7 +149,7 @@ public class EventNewFragment extends Fragment {
         final Person person = db.getUser(email);
         if (person == null){
             if (!email.isEmpty()){
-                String uri = String.format(AppConfig.URL_GET_USER + "?tag=get_user&user_email=%1$s",
+                String uri = String.format(AppConfig.URL_API + "?tag=get_user&user_email=%1$s",
                         email);
                 StringRequest strReq = new StringRequest(Method.GET,
                         uri, new Response.Listener<String>() {

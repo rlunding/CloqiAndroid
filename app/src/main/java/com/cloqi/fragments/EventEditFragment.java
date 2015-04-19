@@ -44,6 +44,7 @@ public class EventEditFragment extends Fragment {
     private EditText totalAmount;
     private YouPayEvent event;
     private String eventDBid;
+    private Button btnToYouPay;
 
     private ArrayAdapter<String> currencyAdapter;
     private ArrayAdapter<Expense> expensesAdapter;
@@ -69,6 +70,7 @@ public class EventEditFragment extends Fragment {
         expenses = (ListView) rootView.getRootView().findViewById(R.id.event_list_expenses);
         btnAddExpense = (Button) rootView.getRootView().findViewById(R.id.btnAddExpense);
         totalAmount = (EditText) rootView.getRootView().findViewById(R.id.event_edit_total_expenses);
+        btnToYouPay = (Button) rootView.getRootView().findViewById(R.id.btnLinkToResult);
 
         //Get database
         db = new SQLiteHandler(getActivity().getApplicationContext());
@@ -120,6 +122,16 @@ public class EventEditFragment extends Fragment {
                 ExpenseNewFragment fragment = ExpenseNewFragment.newInstance(event.getDBid());
                 getFragmentManager().beginTransaction()
                         .replace(R.id.frame_container, fragment).addToBackStack(AppConfig.EXPENSE_EDIT_FRAGMENT_KEY)
+                        .commit();
+            }
+        });
+
+        btnToYouPay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                YouPayFragment fragment = YouPayFragment.newInstance(event.getDBid());
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.frame_container, fragment).addToBackStack("")
                         .commit();
             }
         });

@@ -166,7 +166,7 @@ public class YouPayEventImpl implements YouPayEvent{
      *
      */
 
-    /*
+
     @Override
     public ArrayList<YouPay> calculateWhoPayWho(){
         if(persons.size() == 0 || expenses.size() == 0 || currency == null){
@@ -253,7 +253,7 @@ public class YouPayEventImpl implements YouPayEvent{
         }
         whopaywhoCalculated = true;
         return payList;
-    }*/
+    }
 
     /**
      * This method calculate the amount for an expense in this events currency.<br>
@@ -284,27 +284,29 @@ public class YouPayEventImpl implements YouPayEvent{
      * </ul>
      *
      */
+/*
     @Override
     public ArrayList<YouPay> calculateWhoPayWho(){
         if(persons.size() == 0 || expenses.size() == 0 || currency == null){
+            Log.d(TAG, "No elements to calculate... Returning null");
             return null;
         }
         if (whopaywhoCalculated){
+            Log.d(TAG, "Result already calculated...");
             return payList;
         }
-
+        payList = new ArrayList<>();
         calculateOwed();
-
+        Log.d(TAG, "YouPay list:");
         for (YouPay yp : payList){
             Log.d(TAG, yp.toString());
         }
 
         return payList;
     }
-
-
+*/
     private void calculateOwed() {
-        HashMap<Person, Double> debts = new HashMap<Person, Double>();
+        HashMap<Person, Double> debts = new HashMap<>();
         for (Expense e : expenses) {
             double amount = getAmountInEventCurrency(e);
             int numberOfPeople = e.getSpenders().size();
@@ -326,8 +328,7 @@ public class YouPayEventImpl implements YouPayEvent{
         whopaywhoCalculated = true;
     }
 
-    private void mergeTransactions(HashMap<Person, Double> debts)
-    {
+    private void mergeTransactions(HashMap<Person, Double> debts){
         ArrayList<Person> getMoney = new ArrayList<Person>();
         ArrayList<Person> giveMoney = new ArrayList<Person>();
 

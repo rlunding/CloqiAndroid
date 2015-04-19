@@ -60,6 +60,6 @@ public class WhoPayImpl implements YouPay {
 
     @Override
     public String toString() {
-        return ">" + payer.getName() + " have to pay " + amount + " " + currency.getCode() + " to " + receiver.getName();
+        return payer.getName() + " have to pay " + (((int)amount*100)/100) + " " + currency.getCode() + " to " + receiver.getName();
     }
 }
